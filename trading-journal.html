@@ -697,6 +697,150 @@
 
   .checklist-skip-btn:hover { border-color: #4a4a6a; color: #666688; }
 
+  /* Firebase setup overlay */
+  .fb-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(8px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .fb-overlay.show { opacity: 1; pointer-events: all; }
+
+  .fb-modal {
+    background: #111118;
+    border: 1px solid #2a2a3a;
+    border-radius: 20px;
+    padding: 32px 28px;
+    max-width: 480px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .fb-step {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #1a1a24;
+  }
+
+  .fb-step:last-of-type { border-bottom: none; margin-bottom: 0; }
+
+  .fb-step-num {
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    border-radius: 50%;
+    background: rgba(255,170,0,0.1);
+    border: 1px solid rgba(255,170,0,0.3);
+    color: #ffaa00;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fb-step-content { flex: 1; }
+
+  .fb-step-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 5px;
+    letter-spacing: 0.5px;
+  }
+
+  .fb-step-desc {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    color: #555570;
+    line-height: 1.7;
+    margin-bottom: 8px;
+  }
+
+  .fb-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+    margin-bottom: 6px;
+  }
+
+  .fb-input:focus { border-color: #4a4a6a; }
+  .fb-input::placeholder { color: #333348; }
+
+  .fb-connect-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+  }
+
+  .fb-connect-btn:hover { background: #00ffaa; }
+
+  .fb-skip-btn {
+    width: 100%;
+    padding: 11px;
+    background: none;
+    border: 1px solid #2a2a3a;
+    border-radius: 12px;
+    color: #444458;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+    letter-spacing: 1px;
+  }
+
+  .fb-skip-btn:hover { color: #666688; border-color: #4a4a6a; }
+
+  .fb-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+  }
+
+  .fb-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #333348;
+  }
+
   .panel { display: none; }
   .panel.active { display: block; }
 
@@ -1029,6 +1173,12 @@
       <div style="text-align:right">
         <div class="date-display" id="dateDisplay"></div>
         <div style="margin-top:8px;font-family:'Space Mono',monospace;font-size:10px;color:#333348;letter-spacing:1px">© <a href="https://x.com/tradervalk" target="_blank" style="color:#444460;text-decoration:none;transition:color 0.2s" onmouseover="this.style.color='#00ff88'" onmouseout="this.style.color='#444460'">@tradervalk</a></div>
+        <div style="margin-top:10px">
+          <div class="fb-status" onclick="document.getElementById('fbSetupOverlay').classList.add('show')">
+            <div class="fb-status-dot" id="fbStatusDot"></div>
+            <span style="font-family:'Space Mono',monospace;font-size:9px;color:#555570;letter-spacing:1px" id="fbStatusText">LOCAL ONLY</span>
+          </div>
+        </div>
       </div>
     </div>
   </header>
@@ -1354,6 +1504,53 @@
 </div>
 
 <div class="toast" id="toast">SAVED</div>
+
+<!-- FIREBASE SETUP OVERLAY -->
+<div class="fb-overlay" id="fbSetupOverlay">
+  <div class="fb-modal">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;color:#555570;letter-spacing:3px;margin-bottom:6px">CLOUD SYNC SETUP</div>
+    <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:6px">Connect Firebase</div>
+    <div style="font-family:'Space Mono',monospace;font-size:9px;color:#444458;line-height:1.8;margin-bottom:24px">Free cloud sync — your data saves across all devices.<br>Takes 3 minutes to set up once.</div>
+
+    <div class="fb-step">
+      <div class="fb-step-num">1</div>
+      <div class="fb-step-content">
+        <div class="fb-step-title">CREATE FIREBASE PROJECT</div>
+        <div class="fb-step-desc">Go to console.firebase.google.com → Add project → name it "trading-journal" → disable Google Analytics → Create project</div>
+      </div>
+    </div>
+
+    <div class="fb-step">
+      <div class="fb-step-num">2</div>
+      <div class="fb-step-content">
+        <div class="fb-step-title">ADD A WEB APP</div>
+        <div class="fb-step-desc">In your project → click the ⟨/⟩ Web icon → register app as "journal" → copy the firebaseConfig object shown</div>
+      </div>
+    </div>
+
+    <div class="fb-step">
+      <div class="fb-step-num">3</div>
+      <div class="fb-step-content">
+        <div class="fb-step-title">ENABLE FIRESTORE</div>
+        <div class="fb-step-desc">Build → Firestore Database → Create database → Start in test mode → Choose any region → Done</div>
+      </div>
+    </div>
+
+    <div class="fb-step">
+      <div class="fb-step-num">4</div>
+      <div class="fb-step-content">
+        <div class="fb-step-title">PASTE YOUR CONFIG</div>
+        <div class="fb-step-desc">Paste the values from your firebaseConfig below:</div>
+        <input class="fb-input" id="fb_apiKey" placeholder="apiKey" />
+        <input class="fb-input" id="fb_authDomain" placeholder="authDomain (e.g. your-app.firebaseapp.com)" />
+        <input class="fb-input" id="fb_projectId" placeholder="projectId (e.g. trading-journal-xxxxx)" />
+      </div>
+    </div>
+
+    <button class="fb-connect-btn" onclick="connectFirebase()">CONNECT & SYNC →</button>
+    <button class="fb-skip-btn" onclick="document.getElementById('fbSetupOverlay').classList.remove('show')">USE LOCAL STORAGE FOR NOW</button>
+  </div>
+</div>
 
 <!-- PRE-TRADE CHECKLIST MODAL -->
 <div class="checklist-overlay" id="checklistOverlay">
@@ -1799,6 +1996,86 @@
 
   function saveEntries(entries) {
     localStorage.setItem('tradeJournal', JSON.stringify(entries));
+    // also sync to firebase if connected
+    if(window._fbReady) syncToFirebase(entries);
+  }
+
+  // ── FIREBASE ─────────────────────────────────────────────────
+  window._fbReady = false;
+  window._fbDb = null;
+  window._fbUserId = null;
+
+  function initFirebase(config) {
+    try {
+      if(!firebase.apps.length) firebase.initializeApp(config);
+      window._fbDb = firebase.firestore();
+      window._fbReady = true;
+      localStorage.setItem('fbConfig', JSON.stringify(config));
+      showToast('FIREBASE CONNECTED ✓');
+      loadFromFirebase();
+      document.getElementById('fbSetupOverlay').classList.remove('show');
+      document.getElementById('fbStatusDot').style.background = '#00ff88';
+      document.getElementById('fbStatusText').textContent = 'SYNCING';
+    } catch(e) {
+      showToast('CONNECTION FAILED — CHECK CONFIG');
+      console.error(e);
+    }
+  }
+
+  async function syncToFirebase(entries) {
+    if(!window._fbReady || !window._fbDb) return;
+    try {
+      const uid = getUserId();
+      await window._fbDb.collection('journals').doc(uid).set({ entries: entries, updated: Date.now() });
+    } catch(e) { console.error('Firebase sync error:', e); }
+  }
+
+  async function loadFromFirebase() {
+    if(!window._fbReady || !window._fbDb) return;
+    try {
+      const uid = getUserId();
+      const doc = await window._fbDb.collection('journals').doc(uid).get();
+      if(doc.exists) {
+        const data = doc.data();
+        if(data.entries && data.entries.length > 0) {
+          // merge with local — firebase is source of truth
+          localStorage.setItem('tradeJournal', JSON.stringify(data.entries));
+          showToast('DATA LOADED ✓');
+          renderLog();
+        }
+      }
+    } catch(e) { console.error('Firebase load error:', e); }
+  }
+
+  function getUserId() {
+    let uid = localStorage.getItem('journalUserId');
+    if(!uid) { uid = 'user_' + Date.now() + '_' + Math.random().toString(36).slice(2); localStorage.setItem('journalUserId', uid); }
+    return uid;
+  }
+
+  // try to reconnect from saved config on load
+  window.addEventListener('load', () => {
+    const config = {
+      apiKey: "AIzaSyCapOBK--6LKX-q7qQUoYTnSuonGNgETqE",
+      authDomain: "mental-journal-ae629.firebaseapp.com",
+      projectId: "mental-journal-ae629",
+      storageBucket: "mental-journal-ae629.firebasestorage.app",
+      messagingSenderId: "540297071246",
+      appId: "1:540297071246:web:a15e7a05a51604725c17df"
+    };
+    initFirebase(config);
+  });
+
+  function connectFirebase() {
+    const apiKey    = document.getElementById('fb_apiKey').value.trim();
+    const authDomain= document.getElementById('fb_authDomain').value.trim();
+    const projectId = document.getElementById('fb_projectId').value.trim();
+    if(!apiKey || !authDomain || !projectId) {
+      showToast('FILL IN ALL FIELDS');
+      return;
+    }
+    const config = { apiKey, authDomain, projectId };
+    initFirebase(config);
   }
 
   function savePre() {
@@ -2780,6 +3057,8 @@
     }
   }
 </script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </body>
 </html>
