@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trading Journal</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -2007,18 +2009,30 @@
 
   function initFirebase(config) {
     try {
-      if(!firebase.apps.length) firebase.initializeApp(config);
+      if(!firebase.apps || !firebase.apps.length) {
+        firebase.initializeApp(config);
+      }
       window._fbDb = firebase.firestore();
       window._fbReady = true;
       localStorage.setItem('fbConfig', JSON.stringify(config));
-      showToast('FIREBASE CONNECTED ✓');
-      loadFromFirebase();
+      document.getElementById('fbStatusDot').style.background = '#ffaa00';
+      document.getElementById('fbStatusText').textContent = 'CONNECTING...';
+      loadFromFirebase().then(() => {
+        document.getElementById('fbStatusDot').style.background = '#00ff88';
+        document.getElementById('fbStatusText').textContent = 'SYNCING';
+        showToast('FIREBASE CONNECTED ✓');
+      }).catch(e => {
+        document.getElementById('fbStatusDot').style.background = '#ff4455';
+        document.getElementById('fbStatusText').textContent = 'SYNC ERROR';
+        console.error('Firestore error:', e);
+        showToast('FIRESTORE ERROR — CHECK CONSOLE');
+      });
       document.getElementById('fbSetupOverlay').classList.remove('show');
-      document.getElementById('fbStatusDot').style.background = '#00ff88';
-      document.getElementById('fbStatusText').textContent = 'SYNCING';
     } catch(e) {
-      showToast('CONNECTION FAILED — CHECK CONFIG');
-      console.error(e);
+      console.error('Firebase init error:', e);
+      document.getElementById('fbStatusDot').style.background = '#ff4455';
+      document.getElementById('fbStatusText').textContent = 'ERROR';
+      showToast('FIREBASE ERROR — CHECK CONFIG');
     }
   }
 
@@ -3057,8 +3071,6 @@
     }
   }
 </script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </body>
 </html>
